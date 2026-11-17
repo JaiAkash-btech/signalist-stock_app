@@ -1,0 +1,47 @@
+import { Document, Schema, model, models } from 'mongoose';
+
+export interface WatchlistItem extends Document {
+  userId: string;
+  symbol: string;
+  company: string;
+  addedAt: Date;
+  pinned: boolean;
+  pinnedAt?: Date;
+}
+
+const WatchlistSchema = new Schema<WatchlistItem>({
+  userId: {
+    type: String,
+    required: true,
+    index: true,
+  },
+  symbol: {
+    type: String,
+    required: true,
+    uppercase: true,
+    trim: true,
+  },
+  company: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  addedAt: {
+    type: Date,
+    default: Date.now,
+  },
+  pinned: {
+    type: Boolean,
+    default: false,
+  },
+  pinnedAt: {
+    type: Date,
+  },
+});
+
+// Add a compound index on userId + symbol so a user can’t add the same stock twice.
+WatchlistSchema.index({ userId: 1, symbol: 1 }, { unique: true });
+
+const Watchlist = models?.Watchlist || model<WatchlistItem>('Watchlist', WatchlistSchema);
+
+export default Watchlist;
